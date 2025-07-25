@@ -12,6 +12,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_COMPILER "clang++")
 set(CMAKE_C_COMPILER "clang")
 
+# add_library(MySTL
+#     /vector.cpp
+#     src/list.cpp
+# )
+
 # 添加include目录
 target_include_directories(MySTL INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

@@ -1,9 +1,11 @@
 #pragma once 
 
 #include <cstddef> // 引入size_t
+#include <new>
 #include <utility> // 引入forward、move
 #include <cmath>  // 引入 max
-
+#include <stdexcept>
+#include "algorithm.h"
 
 namespace MySTL {
 
@@ -85,7 +87,18 @@ namespace MySTL {
         };
 
 
-        vector() noexcept :data_(nullptr), size_(0), capacity_(0) {}
+        vector() noexcept: data_(nullptr), size_(0), capacity_(0) {}
+
+        vector(size_t n, const value_type& value = value_type())
+        {
+            data_ = static_cast<pointer>(
+                    ::operator new(n * sizeof(value_type)));
+            for (size_t i = 0; i < n; i++) {
+                new(&data_[i]) value_type(value);
+            }
+            size_ = n;
+            capacity_ = n;
+        }
 
         ~vector() {
             // 销毁所有在内存中构造的对象
@@ -293,7 +306,7 @@ namespace MySTL {
             }
 
             if (index < size_) {
-                new(&data_[size_]) value_type(std::move(data_[size - 1]));
+                new(&data_[size_]) value_type(std::move(data_[size_ - 1]));
                 for (size_t i = size_ - 1;i > index;i--) {   // for循环放外面可能是比较好的实践
                     data_[i] = std::move(data_[i - 1]);
                 }
@@ -350,7 +363,7 @@ namespace MySTL {
                     reserve(std::max(new_size, capacity_*2));  // 增长因子为2,推荐容量和必须容量选最大
                 }
                 // 默认构造新添加的元素
-                for (size_type i = size_; i < new_size; ++i) {
+                for (size_t i = size_; i < new_size; ++i) {
                     new(&data_[i]) value_type();
                 }
             }
@@ -367,6 +380,12 @@ namespace MySTL {
             return data_[index];
         }
 
+        void swap(vector& other) noexcept
+        {
+            MySTL::swap(data_, other.data_);
+            MySTL::swap(size_, other.size_);
+            MySTL::swap(capacity_, other.capacity_);
+        }
 
     private:
         value_type* data_;
