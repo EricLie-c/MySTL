@@ -133,11 +133,11 @@ public:
                         false}; // 插入失败，已存在，返回迭代器
         }
         Node* node = new Node(kv.first, kv.second);
-        node->parent = parent; // parent此时在最右侧
+        node->parent = parent;
 
         if (!parent) // 只有可能root一开始就是空的
             root_ = node;
-        // 先把大小关系调好，后面再fix
+        // 放到正确的位置上
         else if (kv.first < parent->data.first) {
             parent->left = node;
         } else {
@@ -377,11 +377,57 @@ private:
                     x = parent;
                     parent = x->parent;
                 } else {
-                    
+                    // 情况3：兄弟是黑色，兄弟的左孩子是红色，右孩子是黑色
+                    if (!w->right || w->right->color == BLACK) {
+                        if (w->left)
+                            w->left->color = BLACK;
+                        w->color = RED;
+                        rotate_right(w);
+                        w = parent->right;
+                    }
+                    // 情况4：兄弟是黑色，兄弟的右孩子是红色
+                    if (w)
+                        w->color = parent->color;
+                    parent->color = BLACK;
+                    if (w && w->right)
+                        w->right->color = BLACK;
+                    rotate_left(parent);
+                    x = root_;
                 }
-
+            } else {
+                // 对称处理，x 是右孩子
+                Node* w = parent->left;
+                if (w && w->color == RED) {
+                    w->color = BLACK;
+                    parent->color = RED;
+                    rotate_right(parent);
+                    w = parent->left;
+                }
+                if ((!w->left || w->left->color == BLACK) &&
+                    (!w->right || w->right->color == BLACK)) {
+                    if (w)
+                        w->color = RED;
+                    x = parent;
+                } else {
+                    if (!w->left || w->left->color == BLACK) {
+                        if (w->right)
+                            w->right->color = BLACK;
+                        w->color = RED;
+                        rotate_left(w);
+                        w = parent->left;
+                    }
+                    if (w)
+                        w->color = parent->color;
+                    parent->color = BLACK;
+                    if (w && w->left)
+                        w->left->color = BLACK;
+                    rotate_right(parent);
+                    x = root_;
+                }
             }
         }
+        if (x)
+            x->color = BLACK;
     }
 
     // 用v替换u

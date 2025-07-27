@@ -228,17 +228,6 @@ namespace MySTL
             return buckets[idx].back().value; // 其实就是默认值
         }
 
-        T* find(const Key* key)
-        {
-            size_t idx = hash_func(key) % bucket_count;
-            for (auto& node : buckets[idx]) {
-                if (node.key == key) {
-                    return &(node.value);
-                }
-            }
-            return nullptr;
-        }
-
         bool erase(const Key& key)
         {
             size_t idx = hash_func(key) % bucket_count;
